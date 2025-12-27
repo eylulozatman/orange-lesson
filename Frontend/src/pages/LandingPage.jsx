@@ -37,7 +37,7 @@ const LandingPage = () => {
                     transition={{ duration: 0.6 }}
                     style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', maxWidth: '900px', margin: '0 auto 24px' }}
                 >
-                    Eğitimde <span className="orange-gradient-text">Turuncu</span> Devrim Başlıyor
+                    OrangeLesson ile <span className="orange-gradient-text">Ödev Takibi</span> Artık Çok Kolay
                 </motion.h1>
 
                 <motion.p
@@ -46,7 +46,7 @@ const LandingPage = () => {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     style={{ color: 'var(--text-gray)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto 40px' }}
                 >
-                    Dershane yönetiminden ödev takibine, modern ve dinamik bir eğitim deneyimi için OrangeLesson yanınızda.
+                    Hemen üye ol, derslerini takip et ve ödevlerini kolayca gönder.
                 </motion.p>
 
                 <motion.div
