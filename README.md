@@ -1,59 +1,72 @@
-# Education System Backend
+# OrangeLesson Education Management System
 
-Bu proje, öğrencilerin, öğretmenlerin, kursların ve ödevlerin yönetildiği bir eğitim sistemi backend yapısıdır.
+A comprehensive educational platform designed to manage multiple organizations, teachers, students, courses, and homework assignments. This project follows a modern monorepo structure with a .NET 9 Backend and a React + Vite Frontend.
 
-## 🌍 Canlı Yayın (Live Deployment)
+## 🌍 Live Deployment
 - **Frontend (Netlify):** [https://orange-lesson.netlify.app](https://orange-lesson.netlify.app)
 - **Backend (Azure):** [https://orange-lesson-cehvaydjbab4e3ej.eastus-01.azurewebsites.net](https://orange-lesson-cehvaydjbab4e3ej.eastus-01.azurewebsites.net)
-- **Swagger Documentation:** [https://orange-lesson-cehvaydjbab4e3ej.eastus-01.azurewebsites.net/swagger](https://orange-lesson-cehvaydjbab4e3ej.eastus-01.azurewebsites.net/swagger)
+- **API Documentation (Swagger):** [https://orange-lesson-cehvaydjbab4e3ej.eastus-01.azurewebsites.net/swagger](https://orange-lesson-cehvaydjbab4e3ej.eastus-01.azurewebsites.net/swagger)
 
-## Teknoloji Yığını
-- **Framework:** .NET 9 (ASP.NET Core Web API)
-- **Database:** Supabase (PostgreSQL - Bulut Tabanlı)
-- **Architecture:** Monorepo (Backend & Frontend Ayrıştırılmış)
+## 🛠 Technology Stack
+- **Backend:** .NET 9 (ASP.NET Core Web API)
+- **Database:** Supabase (PostgreSQL - Cloud Based)
+- **Frontend:** React + Vite, Framer Motion, Lucide React
+- **Architecture:** Monorepo, Repository Pattern, Service Layer, Multi-Tenancy (Multi-Org support)
 
-## Klasör Yapısı
-Proje, deployment süreçlerini kolaylaştırmak için iki ana klasöre ayrılmıştır:
-- `/Backend`: .NET 9 Web API (Azure Deployment için)
-- `/Frontend`: React + Vite (Netlify Deployment için)
+## 📂 Project Structure
+- `/Backend`: .NET 9 Web API (Azure Deployment Target)
+- `/Frontend`: React + Vite (Netlify Deployment Target)
 
-## Veritabanı Bağlantısı
-Proje artık bulut tabanlı **Supabase (PostgreSQL)** veritabanını kullanmaktadır.
+## 🚀 Local Setup
 
-### Organizasyon Yapısı (Multi-Tenancy)
-Sistem birden fazla kurumu (dershane/okul) destekleyecek şekilde tasarlanmıştır. Tüm veriler (Öğrenci, Öğretmen, Kurs, Ödev) bir `OrganizationId` ile ilişkilendirilmiştir.
+### 1. Prerequisites
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [Node.js (v18 or later)](https://nodejs.org/)
 
-### API Uç Noktaları (Genişletilmiş)
+### 2. Backend Setup
+```bash
+cd Backend
+dotnet build
+dotnet run
+```
+*The API will be available at `http://localhost:5011`*
 
-#### Organizasyon İşlemleri (`/api/organizations`)
-- **POST `/api/organizations`**: Yeni bir kurum (dershane) kaydı oluşturur.
-- **GET `/api/organizations`**: Mevcut tüm kurumları listeler.
+### 3. Frontend Setup
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+*The Web App will be available at `http://localhost:5173`*
 
-### Öğrenci İşlemleri (`/api/students`)
-- **POST `/api/students/register`**: Yeni bir öğrenci kaydı oluşturur.
-- **GET `/api/students`**: Tüm öğrencileri listeler.
-- **POST `/api/students/enroll`**: Öğrenciyi bir kursa kaydeder.
+## 📖 API Endpoints
 
-### Kurs İşlemleri (`/api/courses`)
-- **GET `/api/courses`**: Tüm kursları listeler.
-- **POST `/api/courses`**: Yeni bir kurs oluşturur.
+### Organizations (`/api/organizations`)
+- `POST /api/organizations`: Create a new organization.
+- `GET /api/organizations`: List all visible organizations.
 
-### Öğretmen İşlemleri (`/api/teachers`)
-- **GET `/api/teachers/me?email=...`**: Öğretmen profil ve ders bilgilerini getirir.
-- **POST `/api/teachers/assign-course`**: Öğretmen bir kursa atanır (Her öğretmen sadece 1 kurs verebilir).
+### Students (`/api/students`)
+- `POST /api/students/register`: Register a new student.
+- `GET /api/students`: List all students.
+- `POST /api/students/enroll`: Enroll a student in a course.
 
-### Ödev İşlemleri (`/api/homeworks`)
-- **POST `/api/homeworks`**: (Öğretmen) Yeni ödev oluşturur.
-- **GET `/api/homeworks/teacher/{teacherId}`**: Öğretmenin verdiği ödevleri listeler.
-- **GET `/api/homeworks/student/{studentId}`**: Öğrencinin kayıtlı olduğu kurslardaki ödevleri listeler.
-- **POST `/api/homeworks/submit`**: (Öğrenci) Ödev yanıtı gönderir (Metin ve dosya desteği).
-- **GET `/api/homeworks/{homeworkId}/submissions`**: (Öğretmen) Bir ödeve gelen tüm öğrenci yanıtlarını listeler.
-- **DELETE `/api/homeworks/submission/{submissionId}`**: (Öğrenci) Kendi ödev yanıtını siler.
+### Teachers (`/api/teachers`)
+- `GET /api/teachers/me?email=...`: Get teacher profile and assigned course.
+- `POST /api/teachers/assign-course`: Assign a teacher to a specific course.
 
-## Proje Yapısı
-- **Models**: Veritabanı tablolarımızı temsil eden entity sınıfları.
-- **Data**: Entity Framework DbContext ve Migration dosyaları.
-- **Repositories**: Veritabanı erişim mantığını soyutlayan yapı (IRepository).
-- **Services**: İş mantığının (business logic) bulunduğu katman.
-- **Controllers**: API isteklerini karşılayan ve yanıt veren katman.
-- **Requests/Responses**: DTO (Data Transfer Object) sınıfları.
+### Courses (`/api/courses`)
+- `GET /api/courses`: List all courses.
+- `POST /api/courses`: Create a new course.
+
+### Homework (`/api/homeworks`)
+- `POST /api/homeworks`: Create a new homework assignment (Teacher).
+- `GET /api/homeworks/teacher/{teacherId}`: Get homeworks assigned by a teacher.
+- `GET /api/homeworks/student/{studentId}`: Get homeworks for a student's enrolled courses.
+- `POST /api/homeworks/submit`: Submit a homework (Student).
+- `GET /api/homeworks/{homeworkId}/submissions`: List all student submissions for a specific homework.
+
+## 🔒 Database Configuration
+The system uses **Supabase (PostgreSQL)**. For local development, the connection string is managed via `appsettings.json` or .NET User Secrets.
+
+---
+Developed with ❤️ by Eylül Özatman
