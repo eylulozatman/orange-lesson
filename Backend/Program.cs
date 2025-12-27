@@ -36,23 +36,27 @@ builder.Services.AddScoped<IHomeworkService, HomeworkService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-// Swagger is always on for this project context
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
-// Use CORS
 app.UseCors("AllowAll");
-
 app.UseAuthorization();
 app.MapControllers();
 
+// Seed database on startup
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbInitializer.SeedAsync(context);
-    await TestDataSeeder.SeedAllAsync(context);
+    try 
+    {
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await DbInitializer.SeedAsync(context);
+        await TestDataSeeder.SeedAllAsync(context);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Seeding Error: {ex.Message}");
+    }
 }
 
 app.Run();
