@@ -1,0 +1,25 @@
+# .NET Core
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Frontend (React/Vite)
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env*
+Frontend/.eslintcache
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Secrets
+/appsettings.json
+/appsettings.Development.json
+!/appsettings.json
+!/appsettings.Development.json
