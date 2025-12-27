@@ -2,6 +2,10 @@
 
 Bu proje, öğrencilerin, öğretmenlerin, kursların ve ödevlerin yönetildiği bir eğitim sistemi backend yapısıdır.
 
+## 🌍 Canlı Yayın (Live Deployment)
+- **Frontend (Netlify):** [https://orange-lesson.netlify.app](https://orange-lesson.netlify.app)
+- **Backend (Azure):** [https://orange-lesson-cehvaydjbab4e3ej.eastus-01.azurewebsites.net/swagger](https://orange-lesson-cehvaydjbab4e3ej.eastus-01.azurewebsites.net/swagger)
+
 ## Teknoloji Yığını
 - **Framework:** .NET 9 (ASP.NET Core Web API)
 - **Database:** Supabase (PostgreSQL - Bulut Tabanlı)
