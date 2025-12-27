@@ -5,7 +5,12 @@ Bu proje, öğrencilerin, öğretmenlerin, kursların ve ödevlerin yönetildiğ
 ## Teknoloji Yığını
 - **Framework:** .NET 9 (ASP.NET Core Web API)
 - **Database:** Supabase (PostgreSQL - Bulut Tabanlı)
-- **Architecture:** Repository Pattern, Service Layer & Multi-Tenancy (Multi-Org)
+- **Architecture:** Monorepo (Backend & Frontend Ayrıştırılmış)
+
+## Klasör Yapısı
+Proje, deployment süreçlerini kolaylaştırmak için iki ana klasöre ayrılmıştır:
+- `/Backend`: .NET 9 Web API (Azure Deployment için)
+- `/Frontend`: React + Vite (Netlify Deployment için)
 
 ## Veritabanı Bağlantısı
 Proje artık bulut tabanlı **Supabase (PostgreSQL)** veritabanını kullanmaktadır.

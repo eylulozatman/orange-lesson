@@ -1,6 +1,6 @@
 # .NET Core
-bin/
-obj/
+Backend/bin/
+Backend/obj/
 *.user
 *.userosscache
 *.sln.docstates
@@ -19,7 +19,11 @@ Frontend/.eslintcache
 Thumbs.db
 
 # Secrets
-/appsettings.json
-/appsettings.Development.json
-!/appsettings.json
-!/appsettings.Development.json
+Backend/appsettings.json
+Backend/appsettings.Development.json
+!Backend/appsettings.json
+!Backend/appsettings.Development.json
+
+# Root files
+build_log.txt
+build.log
