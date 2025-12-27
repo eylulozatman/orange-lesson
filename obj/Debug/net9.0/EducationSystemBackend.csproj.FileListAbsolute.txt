@@ -121,3 +121,4 @@ C:\Users\User\Desktop\allProjects\webProjects\EducationSystemBackend\bin\Debug\n
 C:\Users\User\Desktop\allProjects\webProjects\EducationSystemBackend\bin\Debug\net9.0\Frontend\package.json
 C:\Users\User\Desktop\allProjects\webProjects\EducationSystemBackend\bin\Debug\net9.0\Npgsql.dll
 C:\Users\User\Desktop\allProjects\webProjects\EducationSystemBackend\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\User\Desktop\allProjects\webProjects\EducationSystemBackend\obj\Debug\net9.0\EducationSystemBackend.sourcelink.json
