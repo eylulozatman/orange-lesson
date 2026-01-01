@@ -1,63 +1,50 @@
 using EducationSystemBackend.Models;
+using EducationSystemBackend.Repositories;
+using EducationSystemBackend.Responses;
 
 namespace EducationSystemBackend.Services
 {
-    public interface ITeacherService
+   public class TeacherService : ITeacherService
+{
+    private readonly ITeacherRepository _teachers;
+
+    public TeacherService(ITeacherRepository teachers)
     {
-        Task<TeacherCourseInfo?> AssignCourseAsync(Guid teacherId, Guid courseId);
-        Task<IEnumerable<Teacher>> GetAllTeachersAsync();
-        Task<Teacher?> GetByEmailAsync(string email);
-        Task<TeacherCourseInfo?> GetTeacherCourseAsync(Guid teacherId);
+        _teachers = teachers;
     }
 
-    public class TeacherService : ITeacherService
+    public async Task<Teacher> RegisterAsync(Teacher teacher, Guid courseId)
     {
-        private readonly Repositories.IRepository<Teacher> _teacherRepository;
-        private readonly Repositories.IRepository<TeacherCourseInfo> _teacherCourseRepository;
+        await _teachers.AddAsync(teacher);
 
-        public TeacherService(
-            Repositories.IRepository<Teacher> teacherRepository,
-            Repositories.IRepository<TeacherCourseInfo> teacherCourseRepository)
+        await _teachers.AssignCourseAsync(new TeacherCourseInfo
         {
-            _teacherRepository = teacherRepository;
-            _teacherCourseRepository = teacherCourseRepository;
-        }
+            TeacherId = teacher.Id,
+            CourseId = courseId
+        });
 
-        public async Task<TeacherCourseInfo?> AssignCourseAsync(Guid teacherId, Guid courseId)
-        {
-            // Enforce "one course per teacher" rule
-            var existingAssignment = await _teacherCourseRepository.FindAsync(t => t.TeacherId == teacherId);
-            if (existingAssignment.Any())
-            {
-                throw new InvalidOperationException("Teacher is already assigned to a course.");
-            }
-
-            var info = new TeacherCourseInfo
-            {
-                TeacherId = teacherId,
-                CourseId = courseId
-            };
-
-            await _teacherCourseRepository.AddAsync(info);
-            await _teacherCourseRepository.SaveChangesAsync();
-            return info;
-        }
-
-        public async Task<IEnumerable<Teacher>> GetAllTeachersAsync()
-        {
-            return await _teacherRepository.GetAllAsync();
-        }
-
-        public async Task<Teacher?> GetByEmailAsync(string email)
-        {
-            var teachers = await _teacherRepository.FindAsync(t => t.Email == email);
-            return teachers.FirstOrDefault();
-        }
-
-        public async Task<TeacherCourseInfo?> GetTeacherCourseAsync(Guid teacherId)
-        {
-            var info = await _teacherCourseRepository.FindAsync(t => t.TeacherId == teacherId);
-            return info.FirstOrDefault();
-        }
+        return teacher;
     }
+
+    public async Task<Teacher?> LoginAsync(string email, string password)
+    {
+        var teacher = await _teachers.GetByEmailAsync(email);
+        return teacher?.Password == password ? teacher : null;
+    }
+
+    public async Task<TeacherDetailsResponse> GetTeacherDetails(Guid teacherId)
+    {
+        var teacher = await _teachers.GetByIdAsync(teacherId)
+            ?? throw new Exception("Teacher not found");
+
+        var courses = await _teachers.GetCoursesByTeacherId(teacherId);
+
+        return new TeacherDetailsResponse
+        {
+            Teacher = teacher,
+            Courses = courses
+        };
+    }
+}
+
 }

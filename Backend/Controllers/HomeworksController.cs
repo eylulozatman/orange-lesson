@@ -1,7 +1,9 @@
-using EducationSystemBackend.Models;
-using EducationSystemBackend.Requests;
-using EducationSystemBackend.Services;
+using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using EducationSystemBackend.Services;
+using EducationSystemBackend.Requests;
+using EducationSystemBackend.Models;
+using EducationSystemBackend.Repositories;
 
 namespace EducationSystemBackend.Controllers
 {
@@ -9,73 +11,78 @@ namespace EducationSystemBackend.Controllers
     [Route("api/[controller]")]
     public class HomeworksController : ControllerBase
     {
-        private readonly IHomeworkService _homeworkService;
-        private readonly IWebHostEnvironment _env;
+        private readonly IHomeworkService _service;
+        private readonly IFirestoreRepository<StudentCourseInfo> _enrollRepo;
 
-        public HomeworksController(IHomeworkService homeworkService, IWebHostEnvironment env)
+        public HomeworksController(IHomeworkService service, IFirestoreRepository<StudentCourseInfo> enrollRepo)
         {
-            _homeworkService = homeworkService;
-            _env = env;
+            _service = service;
+            _enrollRepo = enrollRepo;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateHomeworkRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateHomeworkRequest req)
         {
-            var homework = await _homeworkService.CreateHomeworkAsync(request);
-            return Ok(homework);
-        }
+            var hw = new Homework
+            {
+                CourseId = req.CourseId,
+                TeacherId = req.TeacherId,
+                Title = req.Title,
+                Description = req.Description,
+                DueDate = req.DueDate
+            };
 
-        [HttpGet("student/{studentId}")]
-        public async Task<IActionResult> GetForStudent(Guid studentId)
-        {
-            var homeworks = await _homeworkService.GetHomeworksForStudentAsync(studentId);
-            return Ok(homeworks);
+            await _service.CreateAsync(hw);
+            return CreatedAtAction(nameof(GetByTeacher), new { teacherId = hw.TeacherId }, hw);
         }
 
         [HttpGet("teacher/{teacherId}")]
         public async Task<IActionResult> GetByTeacher(Guid teacherId)
         {
-            var homeworks = await _homeworkService.GetHomeworksByTeacherAsync(teacherId);
-            return Ok(homeworks);
+            var list = await _service.GetByTeacherAsync(teacherId);
+            return Ok(list);
+        }
+
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetByStudent(Guid studentId)
+        {
+            var list = await _service.GetByStudentAsync(studentId);
+            return Ok(list);
         }
 
         [HttpPost("submit")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> Submit([FromForm] SubmitHomeworkRequest request, IFormFile? file)
+        public async Task<IActionResult> Submit([FromForm] SubmitHomeworkRequest req, IFormFile? file)
         {
-            string? filePath = null;
-            if (file != null)
+            var submission = new HomeworkSubmission
             {
-                var uploads = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads");
-                if (!Directory.Exists(uploads)) Directory.CreateDirectory(uploads);
-                
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                filePath = Path.Combine("uploads", fileName);
-                var fullPath = Path.Combine(uploads, fileName);
+                HomeworkId = req.HomeworkId,
+                StudentId = req.StudentId,
+                Content = req.Content
+            };
 
-                using (var stream = new FileStream(fullPath, FileMode.Create))
+            if (file != null && file.Length > 0)
+            {
+                var uploads = Path.Combine("wwwroot", "uploads");
+                Directory.CreateDirectory(uploads);
+                var fileName = $"{submission.Id}_{Path.GetFileName(file.FileName)}";
+                var filePath = Path.Combine(uploads, fileName);
+                using (var stream = System.IO.File.Create(filePath))
                 {
                     await file.CopyToAsync(stream);
                 }
+                submission.FilePath = $"/uploads/{fileName}";
             }
 
-            var submission = await _homeworkService.SubmitHomeworkAsync(request, filePath);
+            await _service.SubmitAsync(submission);
             return Ok(submission);
-        }
-
-        [HttpDelete("submission/{submissionId}")]
-        public async Task<IActionResult> DeleteSubmission(Guid submissionId, [FromQuery] Guid studentId)
-        {
-            var result = await _homeworkService.DeleteSubmissionAsync(submissionId, studentId);
-            if (!result) return BadRequest("Could not delete submission.");
-            return Ok(new { Message = "Submission deleted." });
         }
 
         [HttpGet("{homeworkId}/submissions")]
         public async Task<IActionResult> GetSubmissions(Guid homeworkId)
         {
-            var submissions = await _homeworkService.GetSubmissionsByHomeworkIdAsync(homeworkId);
-            return Ok(submissions);
+            var subs = await _service.GetSubmissionsAsync(homeworkId);
+            return Ok(subs);
         }
     }
 }
+

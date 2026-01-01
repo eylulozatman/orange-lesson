@@ -6,8 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>66c45e17-9c49-4b6a-9b07-b1bd0992c7d5</UserSecretsId>
   </PropertyGroup>
+<ItemGroup>
+  <None Update="firebase-key.json">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FirebaseAdmin" Version="3.4.0" />
+    <PackageReference Include="Google.Cloud.Firestore" Version="4.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
@@ -22,5 +29,6 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
   </ItemGroup>
+
 
 </Project>

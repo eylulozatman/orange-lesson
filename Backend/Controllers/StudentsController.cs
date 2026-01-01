@@ -1,48 +1,55 @@
-using EducationSystemBackend.Models;
-using EducationSystemBackend.Requests;
-using EducationSystemBackend.Services;
 using Microsoft.AspNetCore.Mvc;
+using EducationSystemBackend.Services;
+using EducationSystemBackend.Requests;
+using EducationSystemBackend.Responses;
+using EducationSystemBackend.Models;
 
 namespace EducationSystemBackend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/students")]
     public class StudentsController : ControllerBase
     {
-        private readonly IStudentService _studentService;
+        private readonly IStudentService _service;
 
-        public StudentsController(IStudentService studentService)
+        public StudentsController(IStudentService service)
         {
-            _studentService = studentService;
+            _service = service;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(StudentRegisterRequest request)
+        public async Task<IActionResult> Register(StudentRegisterRequest req)
         {
-            var response = await _studentService.RegisterAsync(request);
-            return Ok(response);
+            var student = new Student
+            {
+                OrganizationId = req.OrganizationId,
+                FullName = req.FullName,
+                Email = req.Email,
+                Password = req.Password,
+                City = req.City,
+                Grade = req.Grade
+            };
+
+            await _service.RegisterAsync(student);
+
+            return Ok(new AuthResponse
+            {
+                UserId = student.Id,
+                Role = "Student"
+            });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(StudentLoginRequest req)
         {
-            var students = await _studentService.GetAllStudentsAsync();
-            return Ok(students);
-        }
+            var student = await _service.LoginAsync(req.Email, req.Password);
+            if (student == null) return Unauthorized();
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
-        {
-            var student = await _studentService.GetStudentByIdAsync(id);
-            if (student == null) return NotFound();
-            return Ok(student);
-        }
-
-        [HttpPost("enroll")]
-        public async Task<IActionResult> Enroll(Guid studentId, Guid courseId)
-        {
-            await _studentService.EnrollAsync(studentId, courseId);
-            return Ok(new { Message = "Enrolled successfully." });
+            return Ok(new AuthResponse
+            {
+                UserId = student.Id,
+                Role = "Student"
+            });
         }
     }
 }

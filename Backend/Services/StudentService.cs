@@ -1,70 +1,75 @@
 using EducationSystemBackend.Models;
-using EducationSystemBackend.Requests;
+using EducationSystemBackend.Repositories;
 using EducationSystemBackend.Responses;
 
 namespace EducationSystemBackend.Services
 {
-    public interface IStudentService
+public class StudentService : IStudentService
+{
+    private readonly IStudentRepository _students;
+    private readonly ICourseRepository _courses;
+    private readonly IHomeworkRepository _homeworks;
+
+    private static readonly string[] Sections = { "A", "B", "C" };
+
+    public StudentService(
+        IStudentRepository students,
+        ICourseRepository courses,
+        IHomeworkRepository homeworks)
     {
-        Task<StudentRegisterResponse> RegisterAsync(StudentRegisterRequest request);
-        Task<IEnumerable<Student>> GetAllStudentsAsync();
-        Task<Student?> GetStudentByIdAsync(Guid id);
-        Task EnrollAsync(Guid studentId, Guid courseId);
+        _students = students;
+        _courses = courses;
+        _homeworks = homeworks;
     }
 
-    public class StudentService : IStudentService
+    public async Task<Student> RegisterAsync(Student student)
     {
-        private readonly Repositories.IRepository<Student> _studentRepository;
-        private readonly Repositories.IRepository<StudentCourseInfo> _studentCourseRepository;
+        student.Section = Sections[new Random().Next(Sections.Length)];
+        await _students.AddAsync(student);
+        return student;
+    }
 
-        public StudentService(
-            Repositories.IRepository<Student> studentRepository,
-            Repositories.IRepository<StudentCourseInfo> studentCourseRepository)
+    public async Task<Student?> LoginAsync(string email, string password)
+    {
+        var student = await _students.GetByEmailAsync(email);
+        return student?.Password == password ? student : null;
+    }
+
+    public async Task<Student?> GetByEmailAsync(string email)
+        => await _students.GetByEmailAsync(email);
+
+    public async Task<StudentDetailsResponse> GetStudentDetails(Guid studentId)
+    {
+        var student = await _students.GetByIdAsync(studentId)
+            ?? throw new Exception("Student not found");
+
+        var courses = await _students.GetCoursesByStudentId(studentId);
+        var homeworks = await _homeworks.GetByCourseIdsAsync(courses.Select(c => c.Id).ToList());
+
+        return new StudentDetailsResponse
         {
-            _studentRepository = studentRepository;
-            _studentCourseRepository = studentCourseRepository;
-        }
+            Student = student,
+            Courses = courses,
+            Homeworks = homeworks
+        };
+    }
 
-        public async Task<StudentRegisterResponse> RegisterAsync(StudentRegisterRequest request)
+    public async Task EnrollToCourse(Guid studentId, Guid courseId)
+    {
+        await _students.EnrollAsync(new StudentCourseInfo
         {
-            var student = new Student
-            {
-                OrganizationId = request.OrganizationId,
-                FullName = request.FullName,
-                Email = request.Email,
-                Password = request.Password, // In a real app, hash this!
-                City = request.City
-            };
+            StudentId = studentId,
+            CourseId = courseId
+        });
+    }
 
-            await _studentRepository.AddAsync(student);
-            await _studentRepository.SaveChangesAsync();
+    public async Task<List<HomeworkSubmission>> GetSubmissionsByCourse(Guid studentId, Guid courseId)
+        => await _homeworks.GetSubmissionsByStudentAndCourse(studentId, courseId);
 
-            return new StudentRegisterResponse
-            {
-                StudentId = student.Id,
-                Message = "Student registered successfully."
-            };
-        }
-
-        public async Task<IEnumerable<Student>> GetAllStudentsAsync()
+        public Task<List<Student>> GetAllAsync()
         {
-            return await _studentRepository.GetAllAsync();
-        }
-
-        public async Task<Student?> GetStudentByIdAsync(Guid id)
-        {
-            return await _studentRepository.GetByIdAsync(id);
-        }
-
-        public async Task EnrollAsync(Guid studentId, Guid courseId)
-        {
-            var enrollment = new StudentCourseInfo
-            {
-                StudentId = studentId,
-                CourseId = courseId
-            };
-            await _studentCourseRepository.AddAsync(enrollment);
-            await _studentCourseRepository.SaveChangesAsync();
+            throw new NotImplementedException();
         }
     }
+
 }

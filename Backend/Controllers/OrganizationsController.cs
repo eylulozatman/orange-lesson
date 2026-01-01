@@ -1,7 +1,10 @@
-using EducationSystemBackend.Models;
-using EducationSystemBackend.Requests;
-using EducationSystemBackend.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using EducationSystemBackend.Services;
+using EducationSystemBackend.Requests;
+using Microsoft.AspNetCore.Mvc;
+using EducationSystemBackend.Services;
+using EducationSystemBackend.Requests;
+using EducationSystemBackend.Models;
 
 namespace EducationSystemBackend.Controllers
 {
@@ -9,31 +12,30 @@ namespace EducationSystemBackend.Controllers
     [Route("api/[controller]")]
     public class OrganizationsController : ControllerBase
     {
-        private readonly IRepository<Organization> _orgRepository;
+        private readonly OrganizationService _service;
 
-        public OrganizationsController(IRepository<Organization> orgRepository)
+        public OrganizationsController(OrganizationService service)
         {
-            _orgRepository = orgRepository;
+            _service = service;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateOrganizationRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateOrganizationRequest req)
         {
             var org = new Organization
             {
-                Name = request.Name,
-                Address = request.Address
+                Name = req.Name,
+                Address = req.Address
             };
 
-            await _orgRepository.AddAsync(org);
-            await _orgRepository.SaveChangesAsync();
-            return Ok(org);
+            await _service.AddAsync(org);
+            return CreatedAtAction(nameof(GetAll), new { id = org.Id }, org);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var orgs = await _orgRepository.FindAsync(o => !o.IsHidden);
+            var orgs = await _service.GetVisibleAsync();
             return Ok(orgs);
         }
     }
