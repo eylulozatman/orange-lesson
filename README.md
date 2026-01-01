@@ -29,7 +29,7 @@ cd Backend
 dotnet build
 dotnet run
 ```
-*The API will be available at `http://localhost:5011`*
+*The API will be available at `http://localhost:5000`*
 
 ### 3. Frontend Setup
 ```bash
@@ -46,27 +46,33 @@ npm run dev
 - `GET /api/organizations`: List all visible organizations.
 
 ### Students (`/api/students`)
-- `POST /api/students/register`: Register a new student.
-- `GET /api/students`: List all students.
-- `POST /api/students/enroll`: Enroll a student in a course.
+- `POST /api/students/register`: Register a new student. Request body: `StudentRegisterRequest` ({ organizationId, fullName, email, password, city, grade }).
+- `POST /api/students/login`: Login a student. Request body: `StudentLoginRequest` ({ email, password }). Returns `AuthResponse` ({ userId, role }).
+- `POST /api/students/submit-homework`: Submit homework. Request body: `SubmitHomeworkRequest` ({ homeworkId, courseId, studentId, content }).
 
 ### Teachers (`/api/teachers`)
-- `GET /api/teachers/me?email=...`: Get teacher profile and assigned course.
-- `POST /api/teachers/assign-course`: Assign a teacher to a specific course.
+- `POST /api/teachers/register`: Register a teacher. Request body: `TeacherRegisterRequest` ({ organizationId, fullName, email, password, city, courseId }). Returns `AuthResponse`.
+- `POST /api/teachers/login`: Login a teacher. Request body: `TeacherLoginRequest` ({ email, password }). Returns `AuthResponse`.
+- `POST /api/teachers/homeworks`: Create a homework (teacher creates a `Homework` object in body).
+- `GET /api/teachers/{teacherId}/homeworks`: Get homeworks created by a teacher.
 
 ### Courses (`/api/courses`)
-- `GET /api/courses`: List all courses.
-- `POST /api/courses`: Create a new course.
+- `GET /api/courses/by-organization/{organizationId}`: List courses for an organization.
+- `GET /api/courses/by-student/{studentId}`: List courses a student is enrolled in.
+- `GET /api/courses/by-teacher/{teacherId}`: List courses a teacher teaches.
+- `GET /api/courses/id-by-name?organizationId=...&courseName=...`: Get a course id by name for a given organization.
+- `POST /api/courses`: Create a new course. Request body: `CreateCourseRequest`.
+- `POST /api/courses/enroll`: Enroll a student in a course. Request body: `EnrollStudentRequest` ({ studentId, courseId }).
 
 ### Homework (`/api/homeworks`)
-- `POST /api/homeworks`: Create a new homework assignment (Teacher).
+- `POST /api/homeworks`: Create a new homework assignment (Teacher). Request body: `CreateHomeworkRequest` ({ courseId, teacherId, title, description, dueDate }).
 - `GET /api/homeworks/teacher/{teacherId}`: Get homeworks assigned by a teacher.
 - `GET /api/homeworks/student/{studentId}`: Get homeworks for a student's enrolled courses.
-- `POST /api/homeworks/submit`: Submit a homework (Student).
+- `POST /api/homeworks/submit`: Submit a homework (Student). Accepts `multipart/form-data` (fields from `SubmitHomeworkRequest` and optional file upload). Returns created `HomeworkSubmission`.
 - `GET /api/homeworks/{homeworkId}/submissions`: List all student submissions for a specific homework.
 
 ## 🔒 Database Configuration
-The system uses **Supabase (PostgreSQL)**. For local development, the connection string is managed via `appsettings.json` or .NET User Secrets.
+The backend is configured to use **Google Firestore** (Firebase Admin SDK). Provide a Firebase credentials JSON and set `Firebase:CredentialsPath` and `Firebase:ProjectId` in `appsettings.json` or environment variables. The app also seeds collections when `FirestoreSeeder` runs.
 
 ---
 Developed with ❤️ by Eylül Özatman

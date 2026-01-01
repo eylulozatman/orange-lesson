@@ -2,25 +2,74 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Building2 } from 'lucide-react';
-import { organizationService } from '../services/api';
+import { organizationService, studentService } from '../services/api';
 
 const LoginPage = () => {
     const [isTeacher, setIsTeacher] = useState(false);
     const [isRegister, setIsRegister] = useState(false);
     const [organizations, setOrganizations] = useState([]);
     const [selectedOrg, setSelectedOrg] = useState('');
+    const [courses, setCourses] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
         if (isRegister) {
             organizationService.getAll().then(res => setOrganizations(res.data));
+            courseService.getAll().then(res => setCourses(res.data));
         }
     }, [isRegister]);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         const email = e.target.email.value;
-        // Simple mock login logic
+        const password = e.target.password.value;
+
+        if (isRegister) {
+            const fullName = e.target.fullName.value;
+            const city = e.target.city?.value || '';
+
+            if (isTeacher) {
+                const payload = {
+                    organizationId: selectedOrg,
+                    fullName,
+                    email,
+                    password,
+                    city,
+                    courseId: selectedCourse
+                };
+                try {
+                    await teacherService.register(payload);
+                    localStorage.setItem('user', JSON.stringify({ name: fullName, role: 'teacher' }));
+                    navigate('/dashboard');
+                } catch (err) {
+                    console.error('Teacher registration failed', err);
+                    alert('Kayıt yapılamadı. Lütfen tekrar deneyin.');
+                }
+                return;
+            }
+
+            const grade = parseInt(e.target.grade?.value || '0', 10);
+            const payload = {
+                organizationId: selectedOrg,
+                fullName,
+                email,
+                password,
+                city,
+                grade
+            };
+            try {
+                await studentService.register(payload);
+                localStorage.setItem('user', JSON.stringify({ name: fullName, role: 'student' }));
+                navigate('/dashboard');
+            } catch (err) {
+                console.error('Registration failed', err);
+                alert('Kayıt yapılamadı. Lütfen tekrar deneyin.');
+            }
+            return;
+        }
+
+        // Simple mock login logic (no auth endpoint yet)
         if (email === "eylul@ozatman.com") {
             localStorage.setItem('user', JSON.stringify({ name: 'Eylül Özatman', role: 'admin' }));
         } else if (isTeacher) {
@@ -70,7 +119,7 @@ const LoginPage = () => {
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     {isRegister && (
                         <>
-                            <input type="text" placeholder="Ad Soyad" style={{ width: '100%' }} required />
+                            <input name="fullName" type="text" placeholder="Ad Soyad" style={{ width: '100%' }} required />
                             <div style={{ position: 'relative' }}>
                                 <Building2 size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: 'var(--text-gray)' }} />
                                 <select
@@ -94,6 +143,32 @@ const LoginPage = () => {
                                     ))}
                                 </select>
                             </div>
+                            <input name="city" type="text" placeholder="Şehir" style={{ width: '100%' }} required />
+                            {isTeacher ? (
+                                <div style={{ position: 'relative' }}>
+                                    <select
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px 16px',
+                                            background: 'var(--bg-card)',
+                                            color: 'white',
+                                            border: '1px solid var(--border-color)',
+                                            borderRadius: '8px',
+                                            outline: 'none'
+                                        }}
+                                        required
+                                        value={selectedCourse}
+                                        onChange={(e) => setSelectedCourse(e.target.value)}
+                                    >
+                                        <option value="" disabled>Ders Seçiniz</option>
+                                        {courses.map(c => (
+                                            <option key={c.id} value={c.id}>{c.courseName}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ) : (
+                                <input name="grade" type="number" min={1} max={12} placeholder="Sınıf (örn: 9)" style={{ width: '100%' }} required />
+                            )}
                         </>
                     )}
                     <div style={{ position: 'relative' }}>

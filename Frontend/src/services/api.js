@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5011/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 
 const api = axios.create({
@@ -12,6 +12,7 @@ const api = axios.create({
 
 export const studentService = {
     register: (data) => api.post('/students/register', data),
+    login: (data) => api.post('/students/login', data),
     enroll: (studentId, courseId) => api.post('/students/enroll', { studentId, courseId }),
     getById: (id) => api.get(`/students/${id}`),
 };
@@ -28,6 +29,17 @@ export const homeworkService = {
         headers: { 'Content-Type': 'multipart/form-data' }
     }),
     getSubmissions: (homeworkId) => api.get(`/homeworks/${homeworkId}/submissions`),
+};
+
+export const courseService = {
+    getAll: () => api.get('/courses')
+};
+
+export const teacherService = {
+    register: (data) => api.post('/teachers/register', data),
+    login: (data) => api.post('/teachers/login', data),
+    getHomeworks: (teacherId) => api.get(`/teachers/${teacherId}/homeworks`),
+    createHomework: (data) => api.post('/teachers/homeworks', data)
 };
 
 export default api;
