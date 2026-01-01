@@ -52,7 +52,7 @@ builder.Services.AddScoped<IHomeworkRepository, HomeworkRepository>();
 
 // Services
 builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Services.AddScoped<ITeacherService, TeacherAppService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IHomeworkService, HomeworkAppService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<OrganizationService>();

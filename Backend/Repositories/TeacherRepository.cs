@@ -1,55 +1,61 @@
-using Google.Cloud.Firestore;
 using EducationSystemBackend.Models;
-
 
 namespace EducationSystemBackend.Repositories
 {
     public class TeacherRepository : ITeacherRepository
     {
-        private static readonly List<Teacher> _teachers = new();
-        private static readonly List<TeacherCourseInfo> _teacherCourses = new();
+        // In-memory storage
+        public static readonly List<Teacher> Teachers = new();
+        public static readonly List<TeacherCourseInfo> TeacherCourses = new();
+
+        // ---------------- TEACHER ----------------
 
         public Task AddAsync(Teacher teacher)
         {
-            _teachers.Add(teacher);
+            Teachers.Add(teacher);
             return Task.CompletedTask;
+        }
+
+        public Task<Teacher?> GetByIdAsync(Guid teacherId)
+        {
+            var teacher = Teachers.FirstOrDefault(t => t.Id == teacherId);
+            return Task.FromResult(teacher);
         }
 
         public Task<Teacher?> GetByEmailAsync(string email)
         {
-            return Task.FromResult(
-                _teachers.FirstOrDefault(x => x.Email == email)
-            );
+            var teacher = Teachers.FirstOrDefault(t => t.Email == email);
+            return Task.FromResult(teacher);
         }
+
+        public Task<List<Teacher>> GetAllAsync()
+        {
+            return Task.FromResult(Teachers);
+        }
+
+        // ---------------- COURSE RELATION ----------------
 
         public Task AssignCourseAsync(TeacherCourseInfo info)
         {
-            _teacherCourses.Add(info);
+            var exists = TeacherCourses.Any(tc =>
+                tc.TeacherId == info.TeacherId &&
+                tc.CourseId == info.CourseId);
+
+            if (!exists)
+            {
+                TeacherCourses.Add(info);
+            }
+
             return Task.CompletedTask;
         }
 
-        public Task<List<Course>> GetCoursesByTeacherIdAsync(Guid teacherId)
+        public Task<List<TeacherCourseInfo>> GetTeacherCoursesAsync(Guid teacherId)
         {
-            var courseIds = _teacherCourses
-                .Where(x => x.TeacherId == teacherId)
-                .Select(x => x.CourseId)
+            var list = TeacherCourses
+                .Where(tc => tc.TeacherId == teacherId)
                 .ToList();
 
-            var courses = CourseRepository.Courses
-                .Where(c => courseIds.Contains(c.Id))
-                .ToList();
-
-            return Task.FromResult(courses);
-        }
-
-        public Task<Teacher?> GetByIdAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Course>> GetCoursesByTeacherId(Guid teacherId)
-        {
-            throw new NotImplementedException();
+            return Task.FromResult(list);
         }
     }
 }

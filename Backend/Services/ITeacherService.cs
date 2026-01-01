@@ -6,5 +6,12 @@ namespace EducationSystemBackend.Services
     {
         Task<Teacher> RegisterAsync(Teacher teacher, Guid courseId);
         Task<Teacher?> LoginAsync(string email, string password);
+
+        Task<Teacher?> GetByIdAsync(Guid teacherId);
+        Task<Teacher?> GetByEmailAsync(string email);
+
+        Task<List<Course>> GetCoursesAsync(Guid teacherId);
+
+        Task AssignCourseAsync(Guid teacherId, Guid courseId);
     }
 }

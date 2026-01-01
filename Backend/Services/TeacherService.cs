@@ -1,50 +1,69 @@
 using EducationSystemBackend.Models;
 using EducationSystemBackend.Repositories;
-using EducationSystemBackend.Responses;
 
 namespace EducationSystemBackend.Services
 {
-   public class TeacherService : ITeacherService
-{
-    private readonly ITeacherRepository _teachers;
-
-    public TeacherService(ITeacherRepository teachers)
+    public class TeacherService : ITeacherService
     {
-        _teachers = teachers;
-    }
+        private readonly ITeacherRepository _teachers;
+        private readonly ICourseRepository _courses;
 
-    public async Task<Teacher> RegisterAsync(Teacher teacher, Guid courseId)
-    {
-        await _teachers.AddAsync(teacher);
-
-        await _teachers.AssignCourseAsync(new TeacherCourseInfo
+        public TeacherService(
+            ITeacherRepository teachers,
+            ICourseRepository courses)
         {
-            TeacherId = teacher.Id,
-            CourseId = courseId
-        });
+            _teachers = teachers;
+            _courses = courses;
+        }
 
-        return teacher;
-    }
+        // ---------------- AUTH ----------------
 
-    public async Task<Teacher?> LoginAsync(string email, string password)
-    {
-        var teacher = await _teachers.GetByEmailAsync(email);
-        return teacher?.Password == password ? teacher : null;
-    }
-
-    public async Task<TeacherDetailsResponse> GetTeacherDetails(Guid teacherId)
-    {
-        var teacher = await _teachers.GetByIdAsync(teacherId)
-            ?? throw new Exception("Teacher not found");
-
-        var courses = await _teachers.GetCoursesByTeacherId(teacherId);
-
-        return new TeacherDetailsResponse
+        public async Task<Teacher> RegisterAsync(Teacher teacher, Guid courseId)
         {
-            Teacher = teacher,
-            Courses = courses
-        };
-    }
-}
+            await _teachers.AddAsync(teacher);
 
+            await AssignCourseAsync(teacher.Id, courseId);
+
+            return teacher;
+        }
+
+        public async Task<Teacher?> LoginAsync(string email, string password)
+        {
+            var teacher = await _teachers.GetByEmailAsync(email);
+            if (teacher == null) return null;
+            if (teacher.Password != password) return null;
+
+            return teacher;
+        }
+
+        // ---------------- GET ----------------
+
+        public async Task<Teacher?> GetByIdAsync(Guid teacherId)
+        {
+            return await _teachers.GetByIdAsync(teacherId);
+        }
+
+        public async Task<Teacher?> GetByEmailAsync(string email)
+        {
+            return await _teachers.GetByEmailAsync(email);
+        }
+
+        public async Task<List<Course>> GetCoursesAsync(Guid teacherId)
+        {
+            return await _courses.GetByTeacherIdAsync(teacherId);
+        }
+
+        // ---------------- COURSE ----------------
+
+        public async Task AssignCourseAsync(Guid teacherId, Guid courseId)
+        {
+            var info = new TeacherCourseInfo
+            {
+                TeacherId = teacherId,
+                CourseId = courseId
+            };
+
+            await _teachers.AssignCourseAsync(info);
+        }
+    }
 }
