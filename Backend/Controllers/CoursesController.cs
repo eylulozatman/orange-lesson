@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using EducationSystemBackend.Services;
 using EducationSystemBackend.Models;
+using EducationSystemBackend.Requests;
 
 namespace EducationSystemBackend.Controllers
 {
@@ -50,30 +51,27 @@ namespace EducationSystemBackend.Controllers
             [FromQuery] string courseName)
         {
             var courseId = await _service.GetCourseIdByNameAsync(organizationId, courseName);
-            if (courseId == null) return NotFound();
+            if (courseId == null)
+                return NotFound("Course not found");
 
             return Ok(new { CourseId = courseId });
         }
 
-        // 🔹 Yeni ders oluşturma
+        // 🔹 Yeni ders oluştur
         // POST api/courses
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Course course)
+        public async Task<IActionResult> Create([FromBody] CreateCourseRequest request)
         {
-            var created = await _service.CreateAsync(course);
-            return CreatedAtAction(nameof(GetByOrganization),
-                new { organizationId = created.OrganizationId },
-                created);
+            var created = await _service.CreateAsync(request);
+            return Ok(created);
         }
 
         // 🔹 Öğrenciyi derse kaydet
         // POST api/courses/enroll
         [HttpPost("enroll")]
-        public async Task<IActionResult> EnrollStudent(
-            [FromQuery] Guid studentId,
-            [FromQuery] Guid courseId)
+        public async Task<IActionResult> EnrollStudent([FromBody] EnrollStudentRequest request)
         {
-            await _service.EnrollStudentAsync(studentId, courseId);
+            await _service.EnrollStudentAsync(request.StudentId, request.CourseId);
             return Ok();
         }
     }

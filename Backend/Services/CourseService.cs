@@ -1,5 +1,6 @@
 using EducationSystemBackend.Models;
 using EducationSystemBackend.Repositories;
+using EducationSystemBackend.Requests;
 
 namespace EducationSystemBackend.Services
 {
@@ -13,8 +14,16 @@ namespace EducationSystemBackend.Services
         }
 
         // 🔹 Course oluştur
-        public async Task<Course> CreateAsync(Course course)
+        public async Task<Course> CreateAsync(CreateCourseRequest request)
         {
+            var course = new Course
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = request.OrganizationId,
+                CourseName = request.CourseName,
+                Grade = request.Grade
+            };
+
             await _courses.AddAsync(course);
             return course;
         }

@@ -7,23 +7,22 @@ namespace EducationSystemBackend.Services
     {
         private readonly ITeacherRepository _teachers;
         private readonly ICourseRepository _courses;
+        private readonly IHomeworkRepository _homeworks;
 
         public TeacherService(
             ITeacherRepository teachers,
-            ICourseRepository courses)
+            ICourseRepository courses,
+            IHomeworkRepository homeworks)
         {
             _teachers = teachers;
             _courses = courses;
+            _homeworks = homeworks;
         }
-
-        // ---------------- AUTH ----------------
 
         public async Task<Teacher> RegisterAsync(Teacher teacher, Guid courseId)
         {
             await _teachers.AddAsync(teacher);
-
             await AssignCourseAsync(teacher.Id, courseId);
-
             return teacher;
         }
 
@@ -32,38 +31,35 @@ namespace EducationSystemBackend.Services
             var teacher = await _teachers.GetByEmailAsync(email);
             if (teacher == null) return null;
             if (teacher.Password != password) return null;
-
             return teacher;
         }
 
-        // ---------------- GET ----------------
+        public Task<Teacher?> GetByIdAsync(Guid teacherId)
+            => _teachers.GetByIdAsync(teacherId);
 
-        public async Task<Teacher?> GetByIdAsync(Guid teacherId)
-        {
-            return await _teachers.GetByIdAsync(teacherId);
-        }
+        public Task<Teacher?> GetByEmailAsync(string email)
+            => _teachers.GetByEmailAsync(email);
 
-        public async Task<Teacher?> GetByEmailAsync(string email)
-        {
-            return await _teachers.GetByEmailAsync(email);
-        }
-
-        public async Task<List<Course>> GetCoursesAsync(Guid teacherId)
-        {
-            return await _courses.GetByTeacherIdAsync(teacherId);
-        }
-
-        // ---------------- COURSE ----------------
+        public Task<List<Course>> GetCoursesAsync(Guid teacherId)
+            => _courses.GetByTeacherIdAsync(teacherId);
 
         public async Task AssignCourseAsync(Guid teacherId, Guid courseId)
         {
-            var info = new TeacherCourseInfo
+            await _teachers.AssignCourseAsync(new TeacherCourseInfo
             {
                 TeacherId = teacherId,
                 CourseId = courseId
-            };
-
-            await _teachers.AssignCourseAsync(info);
+            });
         }
+
+        // 🆕 HOMEWORK
+        public async Task<Homework> CreateHomeworkAsync(Homework homework)
+        {
+            await _homeworks.AddAsync(homework);
+            return homework;
+        }
+
+        public Task<List<Homework>> GetHomeworksAsync(Guid teacherId)
+            => _homeworks.GetByTeacherIdAsync(teacherId);
     }
 }

@@ -50,5 +50,19 @@ namespace EducationSystemBackend.Controllers
                 Role = "Teacher"
             });
         }
+
+         [HttpPost("homeworks")]
+        public async Task<IActionResult> CreateHomework([FromBody] Homework homework)
+        {
+            var result = await _service.CreateHomeworkAsync(homework);
+            return Ok(result);
+        }
+
+        [HttpGet("{teacherId}/homeworks")]
+        public async Task<IActionResult> GetHomeworks(Guid teacherId)
+        {
+            var list = await _service.GetHomeworksAsync(teacherId);
+            return Ok(list);
+        }
     }
 }

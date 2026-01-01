@@ -51,5 +51,20 @@ namespace EducationSystemBackend.Controllers
                 Role = "Student"
             });
         }
+
+        [HttpPost("submit-homework")]
+        public async Task<IActionResult> SubmitHomework(SubmitHomeworkRequest req)
+        {
+            var submission = new HomeworkSubmission
+            {
+                HomeworkId = req.HomeworkId,
+                CourseId = req.CourseId,
+                StudentId = req.StudentId,
+                Content = req.Content
+            };
+
+            await _service.SubmitHomeworkAsync(submission);
+            return Ok(submission);
+        }
     }
 }

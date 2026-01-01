@@ -63,6 +63,16 @@ public class StudentService : IStudentService
         });
     }
 
+      public async Task SubmitHomeworkAsync(HomeworkSubmission submission)
+        {
+            await _homeworks.AddSubmissionAsync(submission);
+        }
+
+        public Task<List<HomeworkSubmission>> GetMySubmissionsAsync(Guid studentId)
+        {
+            return _homeworks.GetSubmissionsByStudentAsync(studentId);
+        }
+
     public async Task<List<HomeworkSubmission>> GetSubmissionsByCourse(Guid studentId, Guid courseId)
         => await _homeworks.GetSubmissionsByStudentAndCourse(studentId, courseId);
 

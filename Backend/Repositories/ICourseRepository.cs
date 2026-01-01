@@ -2,18 +2,17 @@ using EducationSystemBackend.Models;
 
 namespace EducationSystemBackend.Repositories
 {
-public interface ICourseRepository
-{
-    Task AddAsync(Course course);
-    Task<Course?> GetByIdAsync(Guid courseId);
+    public interface ICourseRepository
+    {
+        Task AddAsync(Course course);
 
-    Task<Course?> GetByNameAsync(Guid organizationId, string courseName);
+        Task<Course?> GetByIdAsync(Guid id);
+        Task<Course?> GetByNameAsync(Guid organizationId, string courseName);
 
-    Task<List<Course>> GetByOrganizationIdAsync(Guid organizationId);
-    Task<List<Course>> GetByStudentIdAsync(Guid studentId);
-    Task<List<Course>> GetByTeacherIdAsync(Guid teacherId);
+        Task<List<Course>> GetByOrganizationIdAsync(Guid organizationId);
+        Task<List<Course>> GetByStudentIdAsync(Guid studentId);
+        Task<List<Course>> GetByTeacherIdAsync(Guid teacherId);
 
-    Task EnrollStudentAsync(Guid studentId, Guid courseId);
-}
-
+        Task EnrollStudentAsync(Guid studentId, Guid courseId);
+    }
 }

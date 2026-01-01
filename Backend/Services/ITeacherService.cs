@@ -13,5 +13,7 @@ namespace EducationSystemBackend.Services
         Task<List<Course>> GetCoursesAsync(Guid teacherId);
 
         Task AssignCourseAsync(Guid teacherId, Guid courseId);
+        Task<Homework> CreateHomeworkAsync(Homework homework);
+        Task<List<Homework>> GetHomeworksAsync(Guid teacherId);
     }
 }
