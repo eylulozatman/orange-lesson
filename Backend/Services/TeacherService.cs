@@ -19,7 +19,7 @@ namespace EducationSystemBackend.Services
             _homeworks = homeworks;
         }
 
-        public async Task<Teacher> RegisterAsync(Teacher teacher, Guid courseId)
+        public async Task<Teacher> RegisterAsync(Teacher teacher, string courseId)
         {
             await _teachers.AddAsync(teacher);
             await AssignCourseAsync(teacher.Id, courseId);
@@ -34,19 +34,20 @@ namespace EducationSystemBackend.Services
             return teacher;
         }
 
-        public Task<Teacher?> GetByIdAsync(Guid teacherId)
+        public Task<Teacher?> GetByIdAsync(string teacherId)
             => _teachers.GetByIdAsync(teacherId);
 
         public Task<Teacher?> GetByEmailAsync(string email)
             => _teachers.GetByEmailAsync(email);
 
-        public Task<List<Course>> GetCoursesAsync(Guid teacherId)
+        public Task<List<Course>> GetCoursesAsync(string teacherId)
             => _courses.GetByTeacherIdAsync(teacherId);
 
-        public async Task AssignCourseAsync(Guid teacherId, Guid courseId)
+        public async Task AssignCourseAsync(string teacherId, string courseId)
         {
             await _teachers.AssignCourseAsync(new TeacherCourseInfo
             {
+                Id = Guid.NewGuid().ToString(),
                 TeacherId = teacherId,
                 CourseId = courseId
             });
@@ -59,7 +60,7 @@ namespace EducationSystemBackend.Services
             return homework;
         }
 
-        public Task<List<Homework>> GetHomeworksAsync(Guid teacherId)
+        public Task<List<Homework>> GetHomeworksAsync(string teacherId)
             => _homeworks.GetByTeacherIdAsync(teacherId);
     }
 }

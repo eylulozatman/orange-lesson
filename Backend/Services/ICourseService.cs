@@ -5,15 +5,15 @@ namespace EducationSystemBackend.Services
 {
     public interface ICourseService
     {
-        Task<List<Course>> GetByOrganizationAsync(Guid organizationId);
-        Task<List<Course>> GetByStudentAsync(Guid studentId);
-        Task<List<Course>> GetByTeacherAsync(Guid teacherId);
+        Task<List<Course>> GetByOrganizationAsync(string organizationId);
+        Task<List<Course>> GetByStudentAsync(string studentId);
+        Task<List<Course>> GetByTeacherAsync(string teacherId);
 
-        Task<Course?> GetByIdAsync(Guid courseId);
-        Task<Guid?> GetCourseIdByNameAsync(Guid organizationId, string courseName);
+        Task<Course?> GetByIdAsync(string courseId);
+        Task<string?> GetCourseIdByNameAsync(string organizationId, string courseName);
 
         Task<Course> CreateAsync(CreateCourseRequest request);
 
-        Task EnrollStudentAsync(Guid studentId, Guid courseId);
+        Task EnrollStudentAsync(string studentId, string courseId);
     }
 }

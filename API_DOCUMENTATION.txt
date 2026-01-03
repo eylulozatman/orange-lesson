@@ -1,0 +1,275 @@
+OrangeLesson API Documentation
+================================
+
+Base URL: http://localhost:5000/api
+
+--------------------------------------------------------------------------------
+1. ORGANIZATIONS (/api/organizations)
+--------------------------------------------------------------------------------
+
+[POST] /api/organizations
+Summary: Create a new organization.
+Request Body (JSON):
+{
+  "name": "string",
+  "address": "string"
+}
+Response (201 Created):
+{
+  "id": "uuid",
+  "name": "string",
+  "address": "string",
+  "isHidden": boolean,
+  "createdAt": "date-time"
+}
+
+[GET] /api/organizations
+Summary: List all visible organizations (where IsHidden is false).
+Response (200 OK):
+[
+  {
+    "id": "uuid",
+    "name": "string",
+    "address": "string",
+    "isHidden": boolean,
+    "createdAt": "date-time"
+  }
+]
+
+--------------------------------------------------------------------------------
+2. STUDENTS (/api/students)
+--------------------------------------------------------------------------------
+
+[POST] /api/students/register
+Summary: Register a new student account.
+Request Body (JSON):
+{
+  "organizationId": "uuid",
+  "fullName": "string",
+  "email": "string",
+  "password": "string",
+  "city": "string",
+  "grade": int
+}
+Response (200 OK):
+{
+  "userId": "uuid",
+  "role": "Student"
+}
+
+[POST] /api/students/login
+Summary: Student login.
+Request Body (JSON):
+{
+  "email": "string",
+  "password": "string"
+}
+Response (200 OK):
+{
+  "userId": "uuid",
+  "role": "Student"
+}
+
+[POST] /api/students/submit-homework
+Summary: Submit homework (Metadata ONLY). Use /api/homeworks/submit for file uploads.
+Request Body (JSON):
+{
+  "homeworkId": "uuid",
+  "courseId": "uuid",
+  "studentId": "uuid",
+  "content": "string"
+}
+Response (200 OK):
+{
+  "id": "uuid",
+  "homeworkId": "uuid",
+  "studentId": "uuid",
+  "courseId": "uuid",
+  "content": "string",
+  ...
+}
+
+--------------------------------------------------------------------------------
+3. TEACHERS (/api/teachers)
+--------------------------------------------------------------------------------
+
+[POST] /api/teachers/register
+Summary: Register a new teacher account.
+Request Body (JSON):
+{
+  "organizationId": "uuid",
+  "fullName": "string",
+  "email": "string",
+  "password": "string",
+  "city": "string",
+  "courseId": "uuid" (Optional/Context specific)
+}
+Response (200 OK):
+{
+  "userId": "uuid",
+  "role": "Teacher"
+}
+
+[POST] /api/teachers/login
+Summary: Teacher login.
+Request Body (JSON):
+{
+  "email": "string",
+  "password": "string"
+}
+Response (200 OK):
+{
+  "userId": "uuid",
+  "role": "Teacher"
+}
+
+[POST] /api/teachers/homeworks
+Summary: Create a homework using the Teacher service wrapper.
+Request Body (JSON) - Takes full Homework model:
+{
+  "courseId": "uuid",
+  "teacherId": "uuid",
+  "title": "string",
+  "description": "string",
+  "dueDate": "date-time"
+}
+Response (200 OK):
+{
+  "id": "uuid",
+  ...
+}
+
+[GET] /api/teachers/{teacherId}/homeworks
+Summary: Get all homeworks created by a specific teacher.
+Response (200 OK):
+[
+  {
+    "id": "uuid",
+    "courseId": "uuid",
+    "title": "string",
+    ...
+  }
+]
+
+--------------------------------------------------------------------------------
+4. COURSES (/api/courses)
+--------------------------------------------------------------------------------
+
+[GET] /api/courses/by-organization/{organizationId}
+Summary: List all courses belonging to an organization.
+Response (200 OK):
+[
+  {
+    "id": "uuid",
+    "organizationId": "uuid",
+    "teacherId": "uuid",
+    "name": "string",
+    ...
+  }
+]
+
+[GET] /api/courses/by-student/{studentId}
+Summary: List courses a student is enrolled in.
+Response (200 OK):
+[
+  { "id": "uuid", "name": "Math 101", ... }
+]
+
+[GET] /api/courses/by-teacher/{teacherId}
+Summary: List courses assigned to a teacher.
+Response (200 OK):
+[
+  { "id": "uuid", "name": "Physics 101", ... }
+]
+
+[GET] /api/courses/id-by-name
+Query Params: ?organizationId={uuid}&courseName={string}
+Summary: Find a course ID by its name within an organization.
+Response (200 OK):
+{
+  "courseId": "uuid"
+}
+
+[POST] /api/courses
+Summary: Create a new course.
+Request Body (JSON):
+{
+  "organizationId": "uuid",
+  "courseName": "string",
+  "grade": int
+}
+Response (200 OK):
+{
+  "id": "uuid",
+  "name": "string",
+  ...
+}
+
+[POST] /api/courses/enroll
+Summary: Enroll a student into a course.
+Request Body (JSON):
+{
+  "studentId": "uuid",
+  "courseId": "uuid"
+}
+Response (200 OK): (Empty)
+
+--------------------------------------------------------------------------------
+5. HOMEWORKS (/api/homeworks)
+--------------------------------------------------------------------------------
+
+[POST] /api/homeworks
+Summary: Create a new homework assignment.
+Request Body (JSON):
+{
+  "organizationId": "uuid",
+  "courseId": "uuid",
+  "teacherId": "uuid",
+  "title": "string",
+  "description": "string",
+  "dueDate": "date-time"
+}
+Response (201 Created):
+{
+  "id": "uuid",
+  "title": "string",
+  ...
+}
+
+[GET] /api/homeworks/teacher/{teacherId}
+Summary: Get homeworks by teacher ID.
+Response (200 OK): List of Homework objects.
+
+[GET] /api/homeworks/student/{studentId}
+Summary: Get homeworks for all courses a student is enrolled in.
+Response (200 OK): List of Homework objects.
+
+[POST] /api/homeworks/submit
+Summary: Submit a homework assignment. Supports file upload.
+Content-Type: multipart/form-data
+Form Fields:
+- homeworkId (uuid)
+- courseId (uuid)
+- studentId (uuid)
+- content (string)
+- file (Binary File)
+Response (200 OK):
+{
+  "id": "uuid",
+  "filePath": "/uploads/filename.ext",
+  "content": "string",
+  ...
+}
+
+[GET] /api/homeworks/{homeworkId}/submissions
+Summary: List all submissions for a specific homework.
+Response (200 OK):
+[
+  {
+    "id": "uuid",
+    "studentId": "uuid",
+    "content": "string",
+    "filePath": "string",
+    "submittedAt": "date-time"
+  }
+]

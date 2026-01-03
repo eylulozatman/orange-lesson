@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Building2 } from 'lucide-react';
-import { organizationService, studentService } from '../services/api';
+import { organizationService, studentService, courseService, teacherService } from '../services/api';
 
 const LoginPage = () => {
     const [isTeacher, setIsTeacher] = useState(false);
@@ -16,9 +16,11 @@ const LoginPage = () => {
     useEffect(() => {
         if (isRegister) {
             organizationService.getAll().then(res => setOrganizations(res.data));
-            courseService.getAll().then(res => setCourses(res.data));
+            if (isTeacher) {
+                // Teacher registration might need courses or just org
+            }
         }
-    }, [isRegister]);
+    }, [isRegister, isTeacher]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -40,8 +42,9 @@ const LoginPage = () => {
                 };
                 try {
                     await teacherService.register(payload);
-                    localStorage.setItem('user', JSON.stringify({ name: fullName, role: 'teacher' }));
-                    navigate('/dashboard');
+                    // For now, redirect to login or auto-login (not implemented full auth flow yet)
+                    alert('Kayıt Başarılı! Lütfen giriş yapınız.');
+                    setIsRegister(false);
                 } catch (err) {
                     console.error('Teacher registration failed', err);
                     alert('Kayıt yapılamadı. Lütfen tekrar deneyin.');
@@ -60,8 +63,8 @@ const LoginPage = () => {
             };
             try {
                 await studentService.register(payload);
-                localStorage.setItem('user', JSON.stringify({ name: fullName, role: 'student' }));
-                navigate('/dashboard');
+                alert('Kayıt Başarılı! Lütfen giriş yapınız.');
+                setIsRegister(false);
             } catch (err) {
                 console.error('Registration failed', err);
                 alert('Kayıt yapılamadı. Lütfen tekrar deneyin.');
@@ -69,13 +72,32 @@ const LoginPage = () => {
             return;
         }
 
-        // Simple mock login logic (no auth endpoint yet)
+        // Mock Login Logic with Real Seeded IDs
         if (email === "eylul@ozatman.com") {
-            localStorage.setItem('user', JSON.stringify({ name: 'Eylül Özatman', role: 'admin' }));
-        } else if (isTeacher) {
-            localStorage.setItem('user', JSON.stringify({ name: 'Hoca', role: 'teacher' }));
+            localStorage.setItem('user', JSON.stringify({
+                id: '99999999-9999-9999-9999-999999999999',
+                name: 'Eylül Özatman',
+                role: 'admin',
+                organizationId: '11111111-1111-1111-1111-111111111111'
+            }));
+        } else if (email === "ali@blueschool.com") {
+            localStorage.setItem('user', JSON.stringify({
+                id: '88888888-8888-8888-8888-888888888888',
+                name: 'Ali Yılmaz',
+                role: 'teacher',
+                organizationId: '22222222-2222-2222-2222-222222222222'
+            }));
+        } else if (email === "can@blueschool.com") {
+            localStorage.setItem('user', JSON.stringify({
+                id: '66666666-6666-6666-6666-666666666666',
+                name: 'Can Yıldız',
+                role: 'student',
+                organizationId: '22222222-2222-2222-2222-222222222222'
+            }));
         } else {
-            localStorage.setItem('user', JSON.stringify({ name: 'Öğrenci', role: 'student' }));
+            // Fallback for new registrations (would normally use response from login endpoint)
+            alert("Lütfen geçerli test hesaplarından birini kullanın (README'ye bakınız).");
+            return;
         }
         navigate('/dashboard');
     };

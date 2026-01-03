@@ -1,21 +1,32 @@
+using Google.Cloud.Firestore;
+
 namespace EducationSystemBackend.Models
 {
+    [FirestoreData]
     public class Homework
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        [FirestoreProperty]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        public Guid OrganizationId { get; set; }
+        [FirestoreProperty]
+        public string OrganizationId { get; set; }
 
-        public Guid CourseId { get; set; }
+        [FirestoreProperty]
+        public string CourseId { get; set; }
 
-        public Guid TeacherId { get; set; }
+        [FirestoreProperty]
+        public string TeacherId { get; set; }
 
+        [FirestoreProperty]
         public required string Title { get; set; }
 
+        [FirestoreProperty]
         public string? Description { get; set; }
 
+        [FirestoreProperty]
         public DateTime AssignedDate { get; set; } = DateTime.UtcNow;
 
+        [FirestoreProperty]
         public DateTime DueDate { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 using EducationSystemBackend.Models;
-
 namespace EducationSystemBackend.Responses;
+
 
 public class StudentDetailsResponse
 {

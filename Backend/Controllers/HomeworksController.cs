@@ -12,12 +12,10 @@ namespace EducationSystemBackend.Controllers
     public class HomeworksController : ControllerBase
     {
         private readonly IHomeworkService _service;
-        private readonly IFirestoreRepository<StudentCourseInfo> _enrollRepo;
 
-        public HomeworksController(IHomeworkService service, IFirestoreRepository<StudentCourseInfo> enrollRepo)
+        public HomeworksController(IHomeworkService service)
         {
             _service = service;
-            _enrollRepo = enrollRepo;
         }
 
         [HttpPost]
@@ -37,14 +35,14 @@ namespace EducationSystemBackend.Controllers
         }
 
         [HttpGet("teacher/{teacherId}")]
-        public async Task<IActionResult> GetByTeacher(Guid teacherId)
+        public async Task<IActionResult> GetByTeacher(string teacherId)
         {
             var list = await _service.GetByTeacherAsync(teacherId);
             return Ok(list);
         }
 
         [HttpGet("student/{studentId}")]
-        public async Task<IActionResult> GetByStudent(Guid studentId)
+        public async Task<IActionResult> GetByStudent(string studentId)
         {
             var list = await _service.GetByStudentAsync(studentId);
             return Ok(list);
@@ -57,7 +55,8 @@ namespace EducationSystemBackend.Controllers
             {
                 HomeworkId = req.HomeworkId,
                 StudentId = req.StudentId,
-                Content = req.Content
+                Content = req.Content,
+                CourseId = req.CourseId
             };
 
             if (file != null && file.Length > 0)
@@ -78,7 +77,7 @@ namespace EducationSystemBackend.Controllers
         }
 
         [HttpGet("{homeworkId}/submissions")]
-        public async Task<IActionResult> GetSubmissions(Guid homeworkId)
+        public async Task<IActionResult> GetSubmissions(string homeworkId)
         {
             var subs = await _service.GetSubmissionsAsync(homeworkId);
             return Ok(subs);

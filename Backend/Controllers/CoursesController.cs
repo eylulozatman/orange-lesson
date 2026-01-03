@@ -19,7 +19,7 @@ namespace EducationSystemBackend.Controllers
         // 🔹 Organization’a ait tüm dersler
         // GET api/courses/by-organization/{organizationId}
         [HttpGet("by-organization/{organizationId}")]
-        public async Task<IActionResult> GetByOrganization(Guid organizationId)
+        public async Task<IActionResult> GetByOrganization(string organizationId)
         {
             var courses = await _service.GetByOrganizationAsync(organizationId);
             return Ok(courses);
@@ -28,7 +28,7 @@ namespace EducationSystemBackend.Controllers
         // 🔹 Öğrencinin kayıtlı olduğu dersler
         // GET api/courses/by-student/{studentId}
         [HttpGet("by-student/{studentId}")]
-        public async Task<IActionResult> GetByStudent(Guid studentId)
+        public async Task<IActionResult> GetByStudent(string studentId)
         {
             var courses = await _service.GetByStudentAsync(studentId);
             return Ok(courses);
@@ -37,7 +37,7 @@ namespace EducationSystemBackend.Controllers
         // 🔹 Öğretmenin verdiği dersler
         // GET api/courses/by-teacher/{teacherId}
         [HttpGet("by-teacher/{teacherId}")]
-        public async Task<IActionResult> GetByTeacher(Guid teacherId)
+        public async Task<IActionResult> GetByTeacher(string teacherId)
         {
             var courses = await _service.GetByTeacherAsync(teacherId);
             return Ok(courses);
@@ -47,7 +47,7 @@ namespace EducationSystemBackend.Controllers
         // GET api/courses/id-by-name?organizationId=...&courseName=...
         [HttpGet("id-by-name")]
         public async Task<IActionResult> GetCourseIdByName(
-            [FromQuery] Guid organizationId,
+            [FromQuery] string organizationId,
             [FromQuery] string courseName)
         {
             var courseId = await _service.GetCourseIdByNameAsync(organizationId, courseName);

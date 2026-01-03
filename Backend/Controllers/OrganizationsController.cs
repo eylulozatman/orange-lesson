@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using EducationSystemBackend.Services;
 using EducationSystemBackend.Requests;
-using Microsoft.AspNetCore.Mvc;
-using EducationSystemBackend.Services;
-using EducationSystemBackend.Requests;
+
 using EducationSystemBackend.Models;
 
 namespace EducationSystemBackend.Controllers

@@ -6,13 +6,13 @@ namespace EducationSystemBackend.Repositories
     {
         Task AddAsync(Course course);
 
-        Task<Course?> GetByIdAsync(Guid id);
-        Task<Course?> GetByNameAsync(Guid organizationId, string courseName);
+        Task<Course?> GetByIdAsync(string id);
+        Task<Course?> GetByNameAsync(string organizationId, string courseName);
 
-        Task<List<Course>> GetByOrganizationIdAsync(Guid organizationId);
-        Task<List<Course>> GetByStudentIdAsync(Guid studentId);
-        Task<List<Course>> GetByTeacherIdAsync(Guid teacherId);
+        Task<List<Course>> GetByOrganizationIdAsync(string organizationId);
+        Task<List<Course>> GetByStudentIdAsync(string studentId);
+        Task<List<Course>> GetByTeacherIdAsync(string teacherId);
 
-        Task EnrollStudentAsync(Guid studentId, Guid courseId);
+        Task EnrollStudentAsync(string studentId, string courseId);
     }
 }

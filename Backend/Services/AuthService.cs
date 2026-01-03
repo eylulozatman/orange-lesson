@@ -5,10 +5,12 @@ namespace EducationSystemBackend.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IFirestoreRepository<Student> _students;
-        private readonly IFirestoreRepository<Teacher> _teachers;
+        private readonly IStudentRepository _students;
+        private readonly ITeacherRepository _teachers;
 
-        public AuthService(IFirestoreRepository<Student> students, IFirestoreRepository<Teacher> teachers)
+        public AuthService(
+            IStudentRepository students,
+            ITeacherRepository teachers)
         {
             _students = students;
             _teachers = teachers;
@@ -16,18 +18,18 @@ namespace EducationSystemBackend.Services
 
         public async Task<Student?> AuthenticateStudentAsync(string email, string password)
         {
-            var matches = await _students.QueryAsync("Email", email);
-            var student = matches.FirstOrDefault();
-            if (student != null && student.Password == password) return student;
-            return null;
+            var student = await _students.GetByEmailAsync(email);
+            if (student == null) return null;
+
+            return student.Password == password ? student : null;
         }
 
         public async Task<Teacher?> AuthenticateTeacherAsync(string email, string password)
         {
-            var matches = await _teachers.QueryAsync("Email", email);
-            var teacher = matches.FirstOrDefault();
-            if (teacher != null && teacher.Password == password) return teacher;
-            return null;
+            var teacher = await _teachers.GetByEmailAsync(email);
+            if (teacher == null) return null;
+
+            return teacher.Password == password ? teacher : null;
         }
     }
 }

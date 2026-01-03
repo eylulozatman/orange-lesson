@@ -1,57 +1,96 @@
+using Google.Cloud.Firestore;
 using EducationSystemBackend.Models;
-
+using FirebaseAdmin;
 namespace EducationSystemBackend.Repositories
 {
     public class HomeworkRepository : IHomeworkRepository
     {
-        public static readonly List<Homework> Homeworks = new();
-        public static readonly List<HomeworkSubmission> Submissions = new();
+        private readonly FirestoreDb _firestoreDb;
+        private const string CollectionName = "Homeworks";
+        private const string SubmissionsCollection = "HomeworkSubmissions";
 
-        public Task AddAsync(Homework homework)
+        public HomeworkRepository(FirestoreDb firestoreDb)
         {
-            Homeworks.Add(homework);
-            return Task.CompletedTask;
+            _firestoreDb = firestoreDb;
         }
 
-        public Task<Homework?> GetByIdAsync(Guid homeworkId)
+        public async Task AddAsync(Homework homework)
         {
-            return Task.FromResult(
-                Homeworks.FirstOrDefault(h => h.Id == homeworkId)
-            );
+            var docRef = _firestoreDb.Collection(CollectionName).Document(homework.Id);
+            await docRef.SetAsync(homework);
         }
 
-        public Task<List<Homework>> GetByCourseIdAsync(Guid courseId)
+        public async Task<List<Homework>> GetAllAsync()
         {
-            return Task.FromResult(
-                Homeworks.Where(h => h.CourseId == courseId).ToList()
-            );
+            var snapshot = await _firestoreDb.Collection(CollectionName).GetSnapshotAsync();
+            return snapshot.Documents.Select(d => d.ConvertTo<Homework>()).ToList();
         }
 
-        public Task<List<Homework>> GetByTeacherIdAsync(Guid teacherId)
+        public async Task<Homework?> GetByIdAsync(string homeworkId)
         {
-            return Task.FromResult(
-                Homeworks.Where(h => h.TeacherId == teacherId).ToList()
-            );
+            var doc = await _firestoreDb.Collection(CollectionName).Document(homeworkId).GetSnapshotAsync();
+            return doc.Exists ? doc.ConvertTo<Homework>() : null;
         }
 
-        public Task AddSubmissionAsync(HomeworkSubmission submission)
+        public async Task<List<Homework>> GetByCourseIdAsync(string courseId)
         {
-            Submissions.Add(submission);
-            return Task.CompletedTask;
+            var query = _firestoreDb.Collection(CollectionName).WhereEqualTo("CourseId", courseId);
+            var snapshot = await query.GetSnapshotAsync();
+            return snapshot.Documents.Select(d => d.ConvertTo<Homework>()).ToList();
         }
 
-        public Task<List<HomeworkSubmission>> GetSubmissionsByHomeworkIdAsync(Guid homeworkId)
+        public async Task<List<Homework>> GetByTeacherIdAsync(string teacherId)
         {
-            return Task.FromResult(
-                Submissions.Where(s => s.HomeworkId == homeworkId).ToList()
-            );
+            var query = _firestoreDb.Collection(CollectionName).WhereEqualTo("TeacherId", teacherId);
+            var snapshot = await query.GetSnapshotAsync();
+            return snapshot.Documents.Select(d => d.ConvertTo<Homework>()).ToList();
         }
 
-        public Task<List<HomeworkSubmission>> GetSubmissionsByStudentAsync(Guid studentId)
+        public async Task<List<Homework>> GetByCourseIdsAsync(List<string> courseIds)
         {
-            return Task.FromResult(
-                Submissions.Where(s => s.StudentId == studentId).ToList()
-            );
+            if (courseIds == null || !courseIds.Any()) return new List<Homework>();
+            
+            var allHomeworks = new List<Homework>();
+            var chunks = courseIds.Chunk(10); 
+
+            foreach (var chunk in chunks)
+            {
+                // chunk is string[] or IEnumerable<string>
+                var query = _firestoreDb.Collection(CollectionName).WhereIn("CourseId", chunk.ToList());
+                var snapshot = await query.GetSnapshotAsync();
+                allHomeworks.AddRange(snapshot.Documents.Select(d => d.ConvertTo<Homework>()));
+            }
+            return allHomeworks;
+        }
+
+        public async Task AddSubmissionAsync(HomeworkSubmission submission)
+        {
+            var docRef = _firestoreDb.Collection(SubmissionsCollection).Document(submission.Id);
+            await docRef.SetAsync(submission);
+        }
+
+        public async Task<List<HomeworkSubmission>> GetSubmissionsByHomeworkIdAsync(string homeworkId)
+        {
+            var query = _firestoreDb.Collection(SubmissionsCollection).WhereEqualTo("HomeworkId", homeworkId);
+            var snapshot = await query.GetSnapshotAsync();
+            return snapshot.Documents.Select(d => d.ConvertTo<HomeworkSubmission>()).ToList();
+        }
+
+        public async Task<List<HomeworkSubmission>> GetSubmissionsByStudentAsync(string studentId)
+        {
+            var query = _firestoreDb.Collection(SubmissionsCollection).WhereEqualTo("StudentId", studentId);
+            var snapshot = await query.GetSnapshotAsync();
+            return snapshot.Documents.Select(d => d.ConvertTo<HomeworkSubmission>()).ToList();
+        }
+
+        public async Task<List<HomeworkSubmission>> GetSubmissionsByStudentAndCourse(string studentId, string courseId)
+        {
+            var query = _firestoreDb.Collection(SubmissionsCollection)
+                .WhereEqualTo("StudentId", studentId)
+                .WhereEqualTo("CourseId", courseId); 
+            
+            var snapshot = await query.GetSnapshotAsync();
+            return snapshot.Documents.Select(d => d.ConvertTo<HomeworkSubmission>()).ToList();
         }
     }
 }

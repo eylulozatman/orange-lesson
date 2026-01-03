@@ -1,9 +1,17 @@
+using Google.Cloud.Firestore;
+
 namespace EducationSystemBackend.Models
 {
+    [FirestoreData]
     public class TeacherCourseInfo
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid TeacherId { get; set; }
-        public Guid CourseId { get; set; }
+        [FirestoreProperty]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+
+        [FirestoreProperty]
+        public string TeacherId { get; set; }
+
+        [FirestoreProperty]
+        public string CourseId { get; set; }
     }
 }

@@ -1,17 +1,29 @@
+using Google.Cloud.Firestore;
+
 namespace EducationSystemBackend.Models
 {
+    [FirestoreData]
     public class HomeworkSubmission
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        [FirestoreProperty]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        public Guid HomeworkId { get; set; }
-        public Guid CourseId { get; set; }   // ✅ GEREKLİ
+        [FirestoreProperty]
+        public string HomeworkId { get; set; }
 
-        public Guid StudentId { get; set; }
+        [FirestoreProperty]
+        public string CourseId { get; set; }
 
-        public string? Content { get; set; }   // Text answer
-        public string? FilePath { get; set; }  // File URL / path
+        [FirestoreProperty]
+        public string StudentId { get; set; }
 
+        [FirestoreProperty]
+        public string? Content { get; set; }
+
+        [FirestoreProperty]
+        public string? FilePath { get; set; }
+
+        [FirestoreProperty]
         public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
     }
 }

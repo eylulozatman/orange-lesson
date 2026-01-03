@@ -59,7 +59,7 @@ namespace EducationSystemBackend.Controllers
         }
 
         [HttpGet("{teacherId}/homeworks")]
-        public async Task<IActionResult> GetHomeworks(Guid teacherId)
+        public async Task<IActionResult> GetHomeworks(string teacherId)
         {
             var list = await _service.GetHomeworksAsync(teacherId);
             return Ok(list);

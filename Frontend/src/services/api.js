@@ -13,7 +13,7 @@ const api = axios.create({
 export const studentService = {
     register: (data) => api.post('/students/register', data),
     login: (data) => api.post('/students/login', data),
-    enroll: (studentId, courseId) => api.post('/students/enroll', { studentId, courseId }),
+    enroll: (studentId, courseId) => api.post('/courses/enroll', { studentId, courseId }),
     getById: (id) => api.get(`/students/${id}`),
 };
 
@@ -32,7 +32,11 @@ export const homeworkService = {
 };
 
 export const courseService = {
-    getAll: () => api.get('/courses')
+    getByOrganization: (organizationId) => api.get(`/courses/by-organization/${organizationId}`),
+    getByStudent: (studentId) => api.get(`/courses/by-student/${studentId}`),
+    getByTeacher: (teacherId) => api.get(`/courses/by-teacher/${teacherId}`),
+    create: (data) => api.post('/courses', data),
+    getCourseIdByName: (organizationId, courseName) => api.get('/courses/id-by-name', { params: { organizationId, courseName } })
 };
 
 export const teacherService = {

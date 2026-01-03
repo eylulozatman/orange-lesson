@@ -18,7 +18,7 @@ namespace EducationSystemBackend.Services
         {
             var course = new Course
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 OrganizationId = request.OrganizationId,
                 CourseName = request.CourseName,
                 Grade = request.Grade
@@ -29,38 +29,38 @@ namespace EducationSystemBackend.Services
         }
 
         // 🔹 Organization’a ait kurslar
-        public async Task<List<Course>> GetByOrganizationAsync(Guid organizationId)
+        public async Task<List<Course>> GetByOrganizationAsync(string organizationId)
         {
             return await _courses.GetByOrganizationIdAsync(organizationId);
         }
 
         // 🔹 Öğrencinin kayıtlı olduğu kurslar
-        public async Task<List<Course>> GetByStudentAsync(Guid studentId)
+        public async Task<List<Course>> GetByStudentAsync(string studentId)
         {
             return await _courses.GetByStudentIdAsync(studentId);
         }
 
         // 🔹 Öğretmenin verdiği kurslar
-        public async Task<List<Course>> GetByTeacherAsync(Guid teacherId)
+        public async Task<List<Course>> GetByTeacherAsync(string teacherId)
         {
             return await _courses.GetByTeacherIdAsync(teacherId);
         }
 
         // 🔹 Course detay
-        public async Task<Course?> GetByIdAsync(Guid courseId)
+        public async Task<Course?> GetByIdAsync(string courseId)
         {
             return await _courses.GetByIdAsync(courseId);
         }
-
+    
         // 🔹 Frontend için: courseName → courseId
-        public async Task<Guid?> GetCourseIdByNameAsync(Guid organizationId, string courseName)
+        public async Task<string?> GetCourseIdByNameAsync(string organizationId, string courseName)
         {
             var course = await _courses.GetByNameAsync(organizationId, courseName);
             return course?.Id;
         }
 
         // 🔹 Öğrenciyi derse kaydet
-        public async Task EnrollStudentAsync(Guid studentId, Guid courseId)
+        public async Task EnrollStudentAsync(string studentId, string courseId)
         {
             await _courses.EnrollStudentAsync(studentId, courseId);
         }

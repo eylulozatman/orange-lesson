@@ -2,8 +2,8 @@ namespace EducationSystemBackend.Requests
 {
     public class EnrollStudentRequest
     {
-        public Guid StudentId { get; set; }
+        public string StudentId { get; set; }
 
-        public Guid CourseId { get; set; }
+        public string CourseId { get; set; }
     }
 }

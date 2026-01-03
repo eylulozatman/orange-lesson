@@ -5,9 +5,9 @@ namespace EducationSystemBackend.Services
 {
     public class OrganizationService
     {
-        private readonly IFirestoreRepository<Organization> _repo;
+        private readonly IOrganizationRepository _repo;
 
-        public OrganizationService(IFirestoreRepository<Organization> repo)
+        public OrganizationService(IOrganizationRepository repo)
         {
             _repo = repo;
         }
@@ -20,6 +20,7 @@ namespace EducationSystemBackend.Services
             return all.Where(o => !o.IsHidden);
         }
 
-        public Task<IEnumerable<Organization>> GetAllAsync() => _repo.GetAllAsync();
+        public Task<IEnumerable<Organization>> GetAllAsync() => 
+            _repo.GetAllAsync().ContinueWith(t => (IEnumerable<Organization>)t.Result);
     }
 }

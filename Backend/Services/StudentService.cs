@@ -38,23 +38,26 @@ public class StudentService : IStudentService
     public async Task<Student?> GetByEmailAsync(string email)
         => await _students.GetByEmailAsync(email);
 
-    public async Task<StudentDetailsResponse> GetStudentDetails(Guid studentId)
+   public async Task<StudentDetailsResponse> GetStudentDetails(string studentId)
+{
+    var student = await _students.GetByIdAsync(studentId)
+        ?? throw new Exception("Student not found");
+
+    var courses = await _students.GetCoursesByStudentId(studentId);
+
+    var homeworks = await _homeworks.GetByCourseIdsAsync(
+        courses.Select(c => c.Id).ToList()
+    );
+
+    return new StudentDetailsResponse
     {
-        var student = await _students.GetByIdAsync(studentId)
-            ?? throw new Exception("Student not found");
+        Student = student,
+        Courses = courses,
+        Homeworks = homeworks
+    };
+}
 
-        var courses = await _students.GetCoursesByStudentId(studentId);
-        var homeworks = await _homeworks.GetByCourseIdsAsync(courses.Select(c => c.Id).ToList());
-
-        return new StudentDetailsResponse
-        {
-            Student = student,
-            Courses = courses,
-            Homeworks = homeworks
-        };
-    }
-
-    public async Task EnrollToCourse(Guid studentId, Guid courseId)
+    public async Task EnrollToCourse(string studentId, string courseId)
     {
         await _students.EnrollAsync(new StudentCourseInfo
         {
@@ -68,18 +71,17 @@ public class StudentService : IStudentService
             await _homeworks.AddSubmissionAsync(submission);
         }
 
-        public Task<List<HomeworkSubmission>> GetMySubmissionsAsync(Guid studentId)
+        public Task<List<HomeworkSubmission>> GetMySubmissionsAsync(string studentId)
         {
             return _homeworks.GetSubmissionsByStudentAsync(studentId);
         }
 
-    public async Task<List<HomeworkSubmission>> GetSubmissionsByCourse(Guid studentId, Guid courseId)
+    public async Task<List<HomeworkSubmission>> GetSubmissionsByCourse(string studentId, string courseId)
         => await _homeworks.GetSubmissionsByStudentAndCourse(studentId, courseId);
 
-        public Task<List<Student>> GetAllAsync()
-        {
-            throw new NotImplementedException();
-        }
+  
+
+     
     }
 
 }

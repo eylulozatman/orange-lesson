@@ -6,11 +6,11 @@ namespace EducationSystemBackend.Repositories
 {
     Task AddAsync(Student student);
     Task<Student?> GetByEmailAsync(string email);
-    Task<Student?> GetByIdAsync(Guid id);
+    Task<Student?> GetByIdAsync(string id);
     Task<List<Student>> GetAllAsync();
 
     Task EnrollAsync(StudentCourseInfo info);
-    Task<List<Course>> GetCoursesByStudentId(Guid studentId);
+    Task<List<Course>> GetCoursesByStudentId(string studentId);
 }
 
 }

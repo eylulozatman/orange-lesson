@@ -1,61 +1,67 @@
+using Google.Cloud.Firestore;
 using EducationSystemBackend.Models;
-
+using FirebaseAdmin;
 namespace EducationSystemBackend.Repositories
 {
     public class TeacherRepository : ITeacherRepository
     {
-        // In-memory storage
-        public static readonly List<Teacher> Teachers = new();
-        public static readonly List<TeacherCourseInfo> TeacherCourses = new();
+        private readonly FirestoreDb _firestoreDb;
+        private const string CollectionName = "Teachers";
+        private const string CoursesCollection = "Courses";
 
-        // ---------------- TEACHER ----------------
-
-        public Task AddAsync(Teacher teacher)
+        public TeacherRepository(FirestoreDb firestoreDb)
         {
-            Teachers.Add(teacher);
-            return Task.CompletedTask;
+            _firestoreDb = firestoreDb;
         }
 
-        public Task<Teacher?> GetByIdAsync(Guid teacherId)
+        public async Task AddAsync(Teacher teacher)
         {
-            var teacher = Teachers.FirstOrDefault(t => t.Id == teacherId);
-            return Task.FromResult(teacher);
+            var docRef = _firestoreDb.Collection(CollectionName).Document(teacher.Id);
+            await docRef.SetAsync(teacher);
         }
 
-        public Task<Teacher?> GetByEmailAsync(string email)
+        public async Task<Teacher?> GetByIdAsync(string teacherId)
         {
-            var teacher = Teachers.FirstOrDefault(t => t.Email == email);
-            return Task.FromResult(teacher);
+            var doc = await _firestoreDb.Collection(CollectionName).Document(teacherId).GetSnapshotAsync();
+            return doc.Exists ? doc.ConvertTo<Teacher>() : null;
         }
 
-        public Task<List<Teacher>> GetAllAsync()
+        public async Task<Teacher?> GetByEmailAsync(string email)
         {
-            return Task.FromResult(Teachers);
+            var query = _firestoreDb.Collection(CollectionName).WhereEqualTo("Email", email);
+            var snapshot = await query.GetSnapshotAsync();
+            return snapshot.Documents.Select(d => d.ConvertTo<Teacher>()).FirstOrDefault();
         }
 
-        // ---------------- COURSE RELATION ----------------
-
-        public Task AssignCourseAsync(TeacherCourseInfo info)
+        public async Task<List<Teacher>> GetAllAsync()
         {
-            var exists = TeacherCourses.Any(tc =>
-                tc.TeacherId == info.TeacherId &&
-                tc.CourseId == info.CourseId);
-
-            if (!exists)
-            {
-                TeacherCourses.Add(info);
-            }
-
-            return Task.CompletedTask;
+            var snapshot = await _firestoreDb.Collection(CollectionName).GetSnapshotAsync();
+            return snapshot.Documents.Select(d => d.ConvertTo<Teacher>()).ToList();
         }
 
-        public Task<List<TeacherCourseInfo>> GetTeacherCoursesAsync(Guid teacherId)
+        public async Task AssignCourseAsync(TeacherCourseInfo info)
         {
-            var list = TeacherCourses
-                .Where(tc => tc.TeacherId == teacherId)
-                .ToList();
+            // Assuming 1-to-Maybe Many, but Course has single TeacherId
+            // We need to update the Course document to set TeacherId
+            var courseRef = _firestoreDb.Collection(CoursesCollection).Document(info.CourseId);
+            // Fetch first to preserve other fields? update only TeacherId
+            await courseRef.UpdateAsync("TeacherId", info.TeacherId);
+        }
 
-            return Task.FromResult(list);
+        public async Task<List<TeacherCourseInfo>> GetTeacherCoursesAsync(string teacherId)
+        {
+            // Query Courses where TeacherId matches
+            var query = _firestoreDb.Collection(CoursesCollection).WhereEqualTo("TeacherId", teacherId);
+            var snapshot = await query.GetSnapshotAsync();
+            
+            return snapshot.Documents.Select(d => {
+                var c = d.ConvertTo<Course>();
+                return new TeacherCourseInfo 
+                { 
+                    CourseId = c.Id, 
+                    TeacherId = teacherId 
+                };
+            }).ToList();
         }
     }
 }

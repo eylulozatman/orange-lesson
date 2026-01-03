@@ -2,11 +2,11 @@ namespace EducationSystemBackend.Requests
 {
     public class SubmitHomeworkRequest
     {
-        public Guid HomeworkId { get; set; }
+        public string HomeworkId { get; set; }
 
-        public Guid CourseId { get; set; }
+        public string CourseId { get; set; }
 
-        public Guid StudentId { get; set; }
+        public string StudentId { get; set; }
 
         public string? Content { get; set; }
     }
